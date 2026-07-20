@@ -85,10 +85,12 @@ function TaskNode({ data, selected }) {
   const Icon = iconMap[data.icon] || IconFileDescription;
   const isEvent = data.kind === "start" || data.kind === "end" || data.kind === "event";
   const isGateway = data.kind === "gateway";
+  const riskText = data.risk || data.challenge;
+  const riskLabel = data.risk ? "To-be risk" : "Current challenge";
 
   return (
     <div
-      className={`flow-node ${isEvent ? "flow-node--event" : ""} ${isGateway ? "flow-node--gateway" : ""} ${data.challenge ? "flow-node--challenge" : ""} ${data.changeType ? `flow-node--${data.changeType}` : ""} ${selected ? "is-selected" : ""}`}
+      className={`flow-node ${isEvent ? "flow-node--event" : ""} ${isGateway ? "flow-node--gateway" : ""} ${riskText ? "flow-node--challenge" : ""} ${data.changeType ? `flow-node--${data.changeType}` : ""} ${selected ? "is-selected" : ""}`}
       style={{ "--accent": data.color || "#7b8494" }}
     >
       <Handle id="in-left" type="target" position={Position.Left} />
@@ -100,8 +102,8 @@ function TaskNode({ data, selected }) {
       <Handle id="out-top" type="source" position={Position.Top} />
       <Handle id="out-left" type="source" position={Position.Left} />
 
-      {data.challenge && (
-        <span className="node-alert" title={data.challenge} aria-label={`Current challenge: ${data.challenge}`}>
+      {riskText && (
+        <span className="node-alert" title={riskText} aria-label={`${riskLabel}: ${riskText}`}>
           <IconAlertTriangle size={13} stroke={2.2} />
         </span>
       )}
@@ -288,6 +290,12 @@ function ProcessCanvas({ workflow }) {
                 <span><strong>Current challenge</strong>{selected.data.challenge}</span>
               </div>
             )}
+            {selected.data.risk && (
+              <div className="drawer-callout drawer-callout--risk">
+                <IconAlertTriangle size={15} />
+                <span><strong>To-be risk</strong>{selected.data.risk}</span>
+              </div>
+            )}
             {selected.data.changeType && (
               <div className="drawer-callout drawer-callout--future">
                 <IconCircleCheck size={15} />
@@ -348,6 +356,12 @@ function FlowHighlights({ workflow }) {
           </div>
         ))}
       </div>
+      {workflow.risk && (
+        <div className="flow-highlights__risk">
+          <IconAlertTriangle size={17} stroke={2} />
+          <span><strong>{workflow.risk.title}</strong>{workflow.risk.body}</span>
+        </div>
+      )}
       {workflow.assumption && <p>{workflow.assumption}</p>}
     </aside>
   );
@@ -465,6 +479,7 @@ export function App() {
               <span><i className="line-dashed" /> Message flow</span>
               <span><i className="shape-diamond" /> Decision</span>
               {activeWorkflow.tone === "risk" && <span><IconAlertTriangle className="key-alert" size={13} /> Current challenge</span>}
+              {activeWorkflow.risk && <span><IconAlertTriangle className="key-alert" size={13} /> To-be risk</span>}
             </div>
           </div>
           <FlowHighlights workflow={activeWorkflow} />

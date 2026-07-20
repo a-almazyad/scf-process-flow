@@ -145,7 +145,7 @@ const onboardingToBeNodes = [
   task("tb-compliance", "tb-lane-operations", "Compliance review", "check", "activity", 1140, 20, "Operations Team", palette.gray.color, "Operations completes the compliance review."),
 
   task("tb-taulia-onboard", "tb-lane-taulia-system", "Complete Taulia program onboarding", "check", "activity", 1350, 20, "Taulia System", palette.purple.color, "Taulia completes the platform-side program onboarding after Manafa's status update; no separate supplier registration is required.", "T&Cs recorded", { changeType: "improved" }),
-  task("tb-finops-configure", "tb-lane-taulia-system", "FinOps configure supplier", "users", "activity", 1580, 20, "Taulia System", palette.purple.color, "Taulia FinOps configures the approved supplier for the SCF program.", "Program configuration", { changeType: "improved" }),
+  task("tb-finops-configure", "tb-lane-taulia-system", "FinOps configure supplier", "users", "activity", 1580, 20, "Taulia System", palette.purple.color, "Taulia FinOps manually configures the approved supplier using the updated KSA supplier-activation procedures.", "Manual Salesforce activation", { risk: "No Salesforce case is created automatically because the supplier does not complete Taulia registration. Automated assignment and activation across currencies and programs is not feasible." }),
 ];
 
 const onboardingToBeEdges = [
@@ -219,6 +219,10 @@ const onboardingVariants = {
       { title: "Manafa-owned outreach", body: "Manafa periodically pulls the invited onboarding submissions and contacts each supplier directly as Manafa." },
       { title: "Single supplier journey", body: "The supplier completes Manafa onboarding, KYC, and authorization before Manafa returns the approved or rejected status." },
     ],
+    risk: {
+      title: "Manual Salesforce activation risk",
+      body: "Direct Manafa onboarding no longer creates the Salesforce case that previously opened after Taulia supplier registration. Automated assignment and activation across currencies and programs - including combining programs for the same supplier - is not feasible; FinOps must use the updated KSA supplier-activation procedures.",
+    },
     tone: "future",
   },
 };
