@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Background,
+  BaseEdge,
   Controls,
   Handle,
   MarkerType,
@@ -123,11 +124,53 @@ function TaskNode({ data, selected }) {
 
 const nodeTypes = { lane: LaneNode, task: TaskNode };
 
+function RoutedEdge({
+  sourceX,
+  sourceY,
+  targetX,
+  targetY,
+  markerEnd,
+  style,
+  label,
+  labelStyle,
+  labelBgStyle,
+  labelBgPadding,
+  labelBgBorderRadius,
+  data,
+}) {
+  const route = data?.route;
+  const path = [
+    `M ${sourceX} ${sourceY}`,
+    `L ${sourceX} ${route.sourceBendY}`,
+    `L ${route.viaX} ${route.sourceBendY}`,
+    `L ${route.viaX} ${route.targetBendY}`,
+    `L ${targetX} ${route.targetBendY}`,
+    `L ${targetX} ${targetY}`,
+  ].join(" ");
+
+  return (
+    <BaseEdge
+      path={path}
+      markerEnd={markerEnd}
+      style={{ ...style, strokeLinejoin: "round", strokeLinecap: "round" }}
+      label={label}
+      labelX={((route.labelAt === "target" ? targetX : sourceX) + route.viaX) / 2}
+      labelY={route.labelAt === "target" ? route.targetBendY : route.sourceBendY}
+      labelStyle={labelStyle}
+      labelBgStyle={labelBgStyle}
+      labelBgPadding={labelBgPadding}
+      labelBgBorderRadius={labelBgBorderRadius}
+    />
+  );
+}
+
+const edgeTypes = { routed: RoutedEdge };
+
 function edgeStyle(edge) {
   const isMessage = edge.data?.kind === "message";
   return {
     ...edge,
-    type: "smoothstep",
+    type: edge.data?.route ? "routed" : "smoothstep",
     pathOptions: { borderRadius: 8, offset: 6 },
     markerEnd: {
       type: isMessage ? MarkerType.Arrow : MarkerType.ArrowClosed,
@@ -249,6 +292,7 @@ function ProcessCanvas({ workflow }) {
           nodes={nodes}
           edges={edges}
           nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
           nodesDraggable={false}
           nodesConnectable={false}
           elementsSelectable
