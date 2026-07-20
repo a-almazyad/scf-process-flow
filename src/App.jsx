@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Background,
   Controls,
@@ -25,7 +25,9 @@ import {
   IconLayoutGrid,
   IconLock,
   IconMail,
+  IconMaximize,
   IconMessageDots,
+  IconMinimize,
   IconPercentage,
   IconReportMoney,
   IconRoute,
@@ -68,11 +70,12 @@ const iconMap = {
 
 function LaneNode({ data }) {
   const LaneIcon = iconMap[data.icon] || IconLayoutGrid;
+  const hasLongLabel = data.label.length > 16;
   return (
     <div className="lane-node" style={{ "--lane": data.color, "--lane-soft": data.soft }}>
-      <div className="lane-rail">
+      <div className={`lane-rail ${hasLongLabel ? "lane-rail--long" : ""}`}>
         <LaneIcon size={15} stroke={1.8} aria-hidden="true" />
-        <span>{data.label}</span>
+        <span title={data.label}>{data.label}</span>
       </div>
     </div>
   );
@@ -142,8 +145,17 @@ function edgeStyle(edge) {
   };
 }
 
-function CanvasToolbar({ showMessages, setShowMessages }) {
+function CanvasToolbar({ showMessages, setShowMessages, isFullscreen, onToggleFullscreen }) {
   const { fitView } = useReactFlow();
+
+  useEffect(() => {
+    const fitTimer = window.setTimeout(
+      () => fitView({ padding: isFullscreen ? 0.035 : 0.08, duration: 450 }),
+      80,
+    );
+    return () => window.clearTimeout(fitTimer);
+  }, [fitView, isFullscreen]);
+
   return (
     <Panel position="top-right" className="canvas-toolbar">
       <button
@@ -159,6 +171,16 @@ function CanvasToolbar({ showMessages, setShowMessages }) {
         <IconArrowsMaximize size={16} />
         Fit
       </button>
+      <button
+        type="button"
+        className={isFullscreen ? "is-active" : ""}
+        onClick={onToggleFullscreen}
+        aria-label={isFullscreen ? "Exit full screen" : "View workflow full screen"}
+        aria-pressed={isFullscreen}
+      >
+        {isFullscreen ? <IconMinimize size={16} /> : <IconMaximize size={16} />}
+        {isFullscreen ? "Exit" : "Full screen"}
+      </button>
     </Panel>
   );
 }
@@ -166,6 +188,45 @@ function CanvasToolbar({ showMessages, setShowMessages }) {
 function ProcessCanvas({ workflow }) {
   const [selected, setSelected] = useState(null);
   const [showMessages, setShowMessages] = useState(true);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const canvasShellRef = useRef(null);
+
+  const leaveFullscreen = () => {
+    setIsFullscreen(false);
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
+    }
+  };
+
+  const toggleFullscreen = () => {
+    if (isFullscreen) {
+      leaveFullscreen();
+      return;
+    }
+
+    setIsFullscreen(true);
+    canvasShellRef.current?.requestFullscreen?.().catch(() => {});
+  };
+
+  useEffect(() => {
+    if (!isFullscreen) return undefined;
+
+    const exitOnEscape = (event) => {
+      if (event.key === "Escape") leaveFullscreen();
+    };
+    const syncNativeFullscreen = () => {
+      if (!document.fullscreenElement) setIsFullscreen(false);
+    };
+
+    document.body.classList.add("is-workflow-fullscreen");
+    document.addEventListener("keydown", exitOnEscape);
+    document.addEventListener("fullscreenchange", syncNativeFullscreen);
+    return () => {
+      document.body.classList.remove("is-workflow-fullscreen");
+      document.removeEventListener("keydown", exitOnEscape);
+      document.removeEventListener("fullscreenchange", syncNativeFullscreen);
+    };
+  }, [isFullscreen]);
 
   const nodes = useMemo(
     () => workflow.nodes.map((node) => ({ ...node, selected: node.id === selected?.id })),
@@ -179,7 +240,7 @@ function ProcessCanvas({ workflow }) {
   );
 
   return (
-    <div className="canvas-shell">
+    <div ref={canvasShellRef} className={`canvas-shell ${isFullscreen ? "is-fullscreen" : ""}`}>
       <ReactFlowProvider>
         <ReactFlow
           key={workflow.id}
@@ -203,7 +264,12 @@ function ProcessCanvas({ workflow }) {
         >
           <Background color="#e2e6eb" gap={24} size={1} />
           <Controls showInteractive={false} position="bottom-left" />
-          <CanvasToolbar showMessages={showMessages} setShowMessages={setShowMessages} />
+          <CanvasToolbar
+            showMessages={showMessages}
+            setShowMessages={setShowMessages}
+            isFullscreen={isFullscreen}
+            onToggleFullscreen={toggleFullscreen}
+          />
         </ReactFlow>
       </ReactFlowProvider>
 

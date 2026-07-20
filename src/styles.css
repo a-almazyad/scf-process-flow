@@ -169,6 +169,9 @@ button { color: inherit; }
 .flow-highlights > p { margin: 12px 0 0; padding-top: 10px; border-top: 1px solid color-mix(in srgb, currentColor 22%, transparent); color: #53606b; font-size: 9.5px; font-weight: 680; }
 
 .canvas-shell { height: min(65vh, 760px); min-height: 560px; border: 1px solid #d9dde3; border-radius: 15px; background: #fbfcfd; position: relative; overflow: hidden; box-shadow: 0 18px 55px rgba(27,33,42,.055); }
+body.is-workflow-fullscreen { overflow: hidden; }
+.canvas-shell.is-fullscreen { position: fixed; inset: 0; z-index: 1000; width: 100vw; height: 100dvh; min-height: 0; border: 0; border-radius: 0; background: #fff; box-shadow: none; }
+.canvas-shell.is-fullscreen .canvas-toolbar { top: 14px !important; right: 14px !important; }
 .react-flow__viewport { cursor: grab; }
 .react-flow__viewport:active { cursor: grabbing; }
 .react-flow__controls { overflow: hidden; border: 1px solid #dce0e6; border-radius: 9px; box-shadow: 0 8px 20px rgba(24,30,38,.08); }
@@ -177,8 +180,11 @@ button { color: inherit; }
 .react-flow__node-lane { pointer-events: none !important; }
 
 .lane-node { width: 100%; height: 100%; background: var(--lane-soft); border: 1.25px solid var(--lane); border-radius: 7px; position: relative; box-shadow: 0 1px 3px rgba(20,25,31,.05); overflow: hidden; }
-.lane-rail { position: absolute; inset: 0 auto 0 0; width: 52px; background: var(--lane); color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; }
-.lane-rail span { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 10px; line-height: 1; letter-spacing: .09em; text-transform: uppercase; font-weight: 760; white-space: nowrap; }
+.lane-rail { position: absolute; inset: 0 auto 0 0; width: 64px; background: var(--lane); color: white; }
+.lane-rail > svg { position: absolute; left: 50%; top: 8px; transform: translateX(-50%); }
+.lane-rail span { position: absolute; left: 50%; top: calc(50% + 10px); width: 82px; transform: translate(-50%, -50%) rotate(-90deg); font-size: 10.2px; line-height: 1.08; letter-spacing: .055em; text-align: center; text-transform: uppercase; font-weight: 800; white-space: normal; overflow-wrap: normal; }
+.lane-rail--long > svg { display: none; }
+.lane-rail--long span { top: 50%; width: 102px; font-size: 9.5px; line-height: 1.06; letter-spacing: .035em; }
 
 .react-flow__node-task { border-radius: 7px; }
 .flow-node { min-height: 76px; padding: 15px 13px 12px; background: #fff; border: 1px solid #828892; border-radius: 6px; box-shadow: 0 2px 4px rgba(23,28,35,.09); display: flex; gap: 9px; align-items: flex-start; color: #22272e; position: relative; transition: box-shadow .18s ease, border-color .18s ease, transform .18s ease; }
