@@ -118,74 +118,70 @@ const onboardingEdges = [
 ];
 
 const onboardingToBeNodes = [
-  lane("tb-lane-aramco", "Aramco", "user", "blue", 20, 1900, 118),
-  lane("tb-lane-taulia-api", "Taulia Onboarding API", "cpu", "purple", 152, 1900, 118),
-  lane("tb-lane-manafa-system", "Manafa System", "cpu", "teal", 284, 1900, 118),
-  lane("tb-lane-supplier", "Supplier", "user", "green", 416, 1900, 122),
-  lane("tb-lane-operations", "Operations Team", "shield", "gray", 552, 1900, 118),
-  lane("tb-lane-taulia-system", "Taulia System", "cpu", "purple", 684, 1900, 118),
-  lane("tb-lane-funders", "Funders", "bank", "yellow", 816, 1900, 118),
+  lane("tb-lane-aramco", "Aramco", "user", "blue", 20, 2180, 118),
+  lane("tb-lane-taulia-api", "Taulia Onboarding API", "cpu", "purple", 152, 2180, 118),
+  lane("tb-lane-manafa-system", "Manafa System", "cpu", "teal", 284, 2180, 122),
+  lane("tb-lane-supplier", "Supplier", "user", "green", 420, 2180, 122),
+  lane("tb-lane-operations", "Operations Team", "shield", "gray", 556, 2180, 118),
+  lane("tb-lane-taulia-system", "Taulia System", "cpu", "purple", 688, 2180, 118),
 
   task("tb-start", "tb-lane-aramco", "Supplier selected", "check", "start", 80, 30, "Aramco", palette.blue.color, "Aramco selects a supplier for the SCF program."),
-  task("tb-flag-invited", "tb-lane-aramco", "Flag supplier as invited", "userPlus", "activity", 270, 22, "Aramco", palette.blue.color, "Aramco flags the supplier as invited in the onboarding source."),
-  task("tb-aramco-email", "tb-lane-aramco", "Send Aramco invitation email", "mail", "activity", 500, 22, "Aramco", palette.blue.color, "Aramco sends the first program invitation directly to the supplier."),
+  task("tb-flag-invited", "tb-lane-aramco", "Select suppliers to invite", "userPlus", "activity", 270, 22, "Aramco", palette.blue.color, "Aramco selects suppliers as invited on the Taulia platform.", "Invited in Taulia"),
 
-  task("tb-publish-invite", "tb-lane-taulia-api", "Publish invited supplier", "send", "activity", 500, 20, "Taulia Onboarding API", palette.purple.color, "The Taulia onboarding API exposes the supplier's invited status.", "Invited flag", { changeType: "new" }),
-  task("tb-api-available", "tb-lane-taulia-api", "Invited supplier available", "check", "event", 700, 29, "Taulia Onboarding API", palette.purple.color, "The invited supplier is available through the pull endpoint.", "Pull endpoint", { changeType: "new" }),
+  task("tb-suppress-email", "tb-lane-taulia-api", "Route invite to Manafa mailbox", "mail", "activity", 270, 20, "Taulia Onboarding API", palette.purple.color, "Taulia uses Manafa's hardcoded email address so the automatic invitation is not sent to the supplier.", "Supplier email suppressed", { changeType: "improved" }),
+  task("tb-queue-submission", "tb-lane-taulia-api", "Queue onboarding submission", "send", "activity", 500, 20, "Taulia Onboarding API", palette.purple.color, "Taulia queues the invited supplier information and outstanding invoices for Manafa to retrieve.", "Supplier data + invoices", { changeType: "new" }),
 
-  task("tb-pull-invited", "tb-lane-manafa-system", "Pull invited suppliers", "transfer", "activity", 700, 20, "Manafa System", palette.teal.color, "Manafa periodically pulls the onboarding endpoint for suppliers flagged as invited.", "Scheduled sync", { changeType: "new" }),
-  task("tb-manafa-email", "tb-lane-manafa-system", "Send Manafa onboarding email", "send", "activity", 920, 20, "Manafa System", palette.teal.color, "Manafa sends the supplier a direct link to start Manafa onboarding.", "Direct onboarding", { changeType: "new" }),
-  task("tb-sync-status", "tb-lane-manafa-system", "Sync onboarding completion", "transfer", "activity", 1400, 20, "Manafa System", palette.teal.color, "Manafa submits the completed onboarding status through the Taulia API.", "API status update", { changeType: "new" }),
-  task("tb-send-funders", "tb-lane-manafa-system", "Send registration to funders", "send", "activity", 1600, 20, "Manafa System", palette.teal.color, "Manafa sends the completed supplier registration to funders."),
+  task("tb-pull-invited", "tb-lane-manafa-system", "Pull onboarding submissions", "transfer", "activity", 500, 22, "Manafa System", palette.teal.color, "Manafa periodically retrieves suppliers that Aramco selected as invited.", "Periodic GET", { changeType: "new" }),
+  task("tb-manafa-email", "tb-lane-manafa-system", "Contact supplier as Manafa", "send", "activity", 720, 22, "Manafa System", palette.teal.color, "Manafa sends its own onboarding email and direct link to the supplier.", "Manafa-owned outreach", { changeType: "new" }),
+  task("tb-sync-status", "tb-lane-manafa-system", "Update onboarding status", "transfer", "activity", 1350, 22, "Manafa System", palette.teal.color, "After KYC and authorization checks, Manafa updates the Taulia onboarding record.", "PATCH · Approved / Rejected", { changeType: "new" }),
+  task("tb-receive-invoices", "tb-lane-manafa-system", "Receive invoices for funding", "file", "activity", 1800, 22, "Manafa System", palette.teal.color, "After Taulia program configuration, eligible invoices enter Manafa's funding flow.", "Funding-flow handoff", { changeType: "improved" }),
+  task("tb-complete", "tb-lane-manafa-system", "Onboarding complete", "check", "end", 2000, 30, "Manafa System", palette.teal.color, "The supplier is configured and ready for Manafa's funding flow."),
 
-  task("tb-register-manafa", "tb-lane-supplier", "Register directly on Manafa", "userPlus", "activity", 920, 21, "Supplier", palette.green.color, "The supplier completes one onboarding registration directly in Manafa.", "No Taulia registration", { changeType: "improved" }),
-  task("tb-company-info", "tb-lane-supplier", "Attach company info", "file", "activity", 1130, 21, "Supplier", palette.green.color, "Upload company information within the Manafa platform.", "Within Manafa platform"),
-  task("tb-sign-agreements", "tb-lane-supplier", "Sign legal agreements", "file", "activity", 1320, 21, "Supplier", palette.green.color, "Supplier signs the FC and AOPF legal agreements.", "FC · AOPF"),
+  task("tb-register-manafa", "tb-lane-supplier", "Register directly on Manafa", "userPlus", "activity", 720, 21, "Supplier", palette.green.color, "The supplier completes one onboarding registration directly in Manafa.", "No Taulia registration", { changeType: "improved" }),
+  task("tb-company-info", "tb-lane-supplier", "Attach company info", "file", "activity", 930, 21, "Supplier", palette.green.color, "Upload company information within the Manafa platform.", "Within Manafa platform"),
+  task("tb-sign-agreements", "tb-lane-supplier", "Sign legal agreements", "file", "activity", 1140, 21, "Supplier", palette.green.color, "Supplier signs the FC and AOPF legal agreements.", "FC · AOPF"),
 
-  task("tb-kyc", "tb-lane-operations", "Perform KYC", "shield", "activity", 1130, 20, "Operations Team", palette.gray.color, "Perform KYC checks and validate authorizations.", "Validate authorizations"),
-  task("tb-compliance", "tb-lane-operations", "Compliance review", "check", "activity", 1320, 20, "Operations Team", palette.gray.color, "Operations completes the compliance review."),
+  task("tb-kyc", "tb-lane-operations", "Perform KYC", "shield", "activity", 930, 20, "Operations Team", palette.gray.color, "Perform KYC checks and validate authorizations.", "Validate authorizations"),
+  task("tb-compliance", "tb-lane-operations", "Compliance review", "check", "activity", 1140, 20, "Operations Team", palette.gray.color, "Operations completes the compliance review."),
 
-  task("tb-activate-invoices", "tb-lane-taulia-system", "Activate invoice submission", "check", "activity", 1400, 20, "Taulia System", palette.purple.color, "Taulia activates invoice submission after receiving the completed onboarding status.", "API-enabled activation", { changeType: "improved" }),
-
-  task("tb-receive-registration", "tb-lane-funders", "Receive supplier registration", "file", "event", 1600, 29, "Funders", palette.yellow.color, "Funders receive the supplier registration file."),
-  task("tb-complete", "tb-lane-funders", "Onboarding complete", "check", "end", 1760, 29, "Funders", palette.yellow.color, "Supplier onboarding is complete."),
+  task("tb-taulia-onboard", "tb-lane-taulia-system", "Complete Taulia program onboarding", "check", "activity", 1350, 20, "Taulia System", palette.purple.color, "Taulia completes the platform-side program onboarding after Manafa's status update; no separate supplier registration is required.", "T&Cs recorded", { changeType: "improved" }),
+  task("tb-finops-configure", "tb-lane-taulia-system", "FinOps configure supplier", "users", "activity", 1580, 20, "Taulia System", palette.purple.color, "Taulia FinOps configures the approved supplier for the SCF program.", "Program configuration", { changeType: "improved" }),
 ];
 
 const onboardingToBeEdges = [
   edge("te-1", "tb-start", "tb-flag-invited"),
-  edge("te-2", "tb-flag-invited", "tb-aramco-email"),
-  message("te-3", "tb-aramco-email", "tb-publish-invite", "invited flag"),
-  edge("te-4", "tb-publish-invite", "tb-api-available"),
-  message("te-5", "tb-api-available", "tb-pull-invited", "scheduled pull"),
-  edge("te-6", "tb-pull-invited", "tb-manafa-email"),
-  message("te-7", "tb-manafa-email", "tb-register-manafa", "Manafa onboarding link"),
-  edge("te-8", "tb-register-manafa", "tb-company-info"),
-  message("te-9", "tb-company-info", "tb-kyc"),
-  edge("te-10", "tb-kyc", "tb-compliance"),
-  edge("te-11", "tb-compliance", "tb-sign-agreements", {
+  message("te-2", "tb-flag-invited", "tb-suppress-email", "invited selection"),
+  edge("te-3", "tb-suppress-email", "tb-queue-submission"),
+  message("te-4", "tb-queue-submission", "tb-pull-invited", "scheduled pull"),
+  edge("te-5", "tb-pull-invited", "tb-manafa-email"),
+  message("te-6", "tb-manafa-email", "tb-register-manafa", "Manafa onboarding link"),
+  edge("te-7", "tb-register-manafa", "tb-company-info"),
+  message("te-8", "tb-company-info", "tb-kyc"),
+  edge("te-9", "tb-kyc", "tb-compliance"),
+  edge("te-10", "tb-compliance", "tb-sign-agreements", {
     kind: "message",
     sourceHandle: "out-top",
     targetHandle: "in-left",
   }),
-  edge("te-12", "tb-sign-agreements", "tb-sync-status", {
+  edge("te-11", "tb-sign-agreements", "tb-sync-status", {
     kind: "message",
     sourceHandle: "out-top",
     targetHandle: "in-left",
   }),
-  edge("te-13", "tb-sync-status", "tb-activate-invoices", {
+  edge("te-12", "tb-sync-status", "tb-taulia-onboard", {
     kind: "message",
-    label: "onboarding complete",
+    label: "approved / rejected",
     sourceHandle: "out-bottom",
-    targetHandle: "in-right",
+    targetHandle: "in-top",
   }),
-  edge("te-14", "tb-activate-invoices", "tb-send-funders", {
+  edge("te-13", "tb-taulia-onboard", "tb-finops-configure"),
+  edge("te-14", "tb-finops-configure", "tb-receive-invoices", {
     kind: "message",
-    label: "activation confirmed",
-    sourceHandle: "out-right",
+    label: "invoices ready",
+    sourceHandle: "out-top",
     targetHandle: "in-bottom",
   }),
-  message("te-15", "tb-send-funders", "tb-receive-registration", "supplier registration file"),
-  edge("te-16", "tb-receive-registration", "tb-complete"),
+  edge("te-15", "tb-receive-invoices", "tb-complete"),
 ];
 
 const onboardingVariants = {
@@ -211,19 +207,18 @@ const onboardingVariants = {
     id: "onboarding-to-be",
     phase: "Process 01 · API-enabled future state",
     title: "Supplier Onboarding · To-be",
-    summary: "Aramco flags and emails invited suppliers; Manafa pulls the Taulia onboarding API and takes each supplier directly through onboarding, KYC, and authorization.",
-    stepCount: 17,
-    laneCount: 7,
+    summary: "Aramco selects suppliers to invite in Taulia; Taulia suppresses the supplier email while Manafa pulls the queued submissions and owns supplier outreach, onboarding, KYC, and authorization.",
+    stepCount: 16,
+    laneCount: 6,
     nodes: onboardingToBeNodes,
     edges: onboardingToBeEdges,
     highlightTitle: "API-enabled target journey",
-    highlightSummary: "Supplier-facing Taulia registration is removed while Manafa owns the direct onboarding experience.",
+    highlightSummary: "Taulia's automatic invitation is redirected away from the supplier while Manafa owns the direct onboarding experience.",
     highlights: [
-      { title: "Taulia registration removed", body: "The supplier no longer receives a Taulia registration email or completes a separate Taulia profile." },
-      { title: "Scheduled invited-supplier sync", body: "Manafa periodically pulls suppliers flagged as invited through the onboarding endpoint." },
-      { title: "Direct Manafa onboarding", body: "Manafa sends its own invitation and moves the supplier directly into KYC and authorization validation." },
+      { title: "Taulia email suppressed", body: "Taulia uses Manafa's hardcoded mailbox for the automatic invitation, so the supplier receives no Taulia email." },
+      { title: "Manafa-owned outreach", body: "Manafa periodically pulls the invited onboarding submissions and contacts each supplier directly as Manafa." },
+      { title: "Single supplier journey", body: "The supplier completes Manafa onboarding, KYC, and authorization before Manafa returns the approved or rejected status." },
     ],
-    assumption: "Future-state dependency: Taulia must provide the invited-supplier pull endpoint and onboarding-status API.",
     tone: "future",
   },
 };
